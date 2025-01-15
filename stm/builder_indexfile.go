@@ -14,6 +14,7 @@ type BuilderIndexfile struct {
 	content  []byte
 	linkcnt  int
 	totalcnt int
+	written  bool
 }
 
 // Add method joins old bytes with creates bytes by it calls from Sitemap.Finalize method.
@@ -26,6 +27,13 @@ func (b *BuilderIndexfile) Add(link interface{}) BuilderError {
 
 	b.totalcnt += bldr.linkcnt
 	b.linkcnt++
+
+	// If not consolidating indexes, write immediately
+	if !b.opts.consolidateIndex {
+		b.Write()
+		b.content = []byte{} // Clear content after writing
+		b.linkcnt = 0
+	}
 	return nil
 }
 
@@ -44,7 +52,15 @@ func (b *BuilderIndexfile) XMLContent() []byte {
 
 // Write and Builderfile.Write are almost the same behavior.
 func (b *BuilderIndexfile) Write() {
-	c := b.XMLContent()
+	// If consolidating indexes and already written, skip
+	if b.opts.consolidateIndex && b.written {
+		return
+	}
 
+	c := b.XMLContent()
 	b.loc.Write(c, b.linkcnt)
+	
+	if b.opts.consolidateIndex {
+		b.written = true
+	}
 }

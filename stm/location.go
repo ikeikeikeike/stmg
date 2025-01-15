@@ -95,15 +95,27 @@ func (loc *Location) Filename() string {
 		log.Fatal("[F] No filename or namer set")
 	}
 
-	if loc.filename == "" {
-		loc.filename = nmr.String()
-
-		if !loc.opts.compress {
-			newName := reGzip.ReplaceAllString(loc.filename, "")
-			loc.filename = newName
-		}
+	if loc.IsReservedName() {
+		return loc.filename
 	}
-	return loc.filename
+
+	var filename string
+	// If consolidating indexes and this is an index file, use the configured index filename
+	if loc.opts.consolidateIndex && nmr.IsIndex() {
+		filename = loc.opts.indexFilename
+	} else if nmr.IsMultiple() {
+		// For regular sitemap files, use the configured pattern
+		filename = fmt.Sprintf(loc.opts.filePattern, nmr.Counter())
+	} else {
+		filename = fmt.Sprintf("%s.%s", loc.opts.filename, nmr.Ext())
+	}
+
+	// Handle compression extension
+	if !loc.opts.compress {
+		filename = reGzip.ReplaceAllString(filename, "")
+	}
+
+	return filename
 }
 
 // ReserveName returns that sets filename if this struct didn't keep filename and
