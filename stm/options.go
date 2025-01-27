@@ -4,15 +4,18 @@ package stm
 func NewOptions() *Options {
 	// Default values
 	return &Options{
-		defaultHost:  "http://www.example.com",
-		sitemapsHost: "", // http://s3.amazonaws.com/sitemap-generator/,
-		publicPath:   "public/",
-		sitemapsPath: "sitemaps/",
-		filename:     "sitemap",
-		verbose:      true,
-		compress:     true,
-		pretty:       false,
-		adp:          NewFileAdapter(),
+		defaultHost:      "http://www.example.com",
+		sitemapsHost:    "", // http://s3.amazonaws.com/sitemap-generator/,
+		publicPath:      "public/",
+		sitemapsPath:    "sitemaps/",
+		filename:        "sitemap",
+		verbose:         true,
+		compress:        true,
+		pretty:         false,
+		adp:            NewFileAdapter(),
+		consolidateIndex: false,
+		indexFilename:   "sitemap.xml",
+		filePattern:     "sitemap-%d.xml",
 	}
 }
 
@@ -25,10 +28,14 @@ type Options struct {
 	filename     string
 	verbose      bool
 	compress     bool
-	pretty       bool
-	adp          Adapter
-	nmr          *Namer
-	loc          *Location
+	pretty      bool
+	adp         Adapter
+	nmr         *Namer
+	loc         *Location
+	// New options for sitemap control
+	consolidateIndex bool        // Whether to write all sitemaps to a single index file
+	indexFilename   string       // The filename for the consolidated index file
+	filePattern     string       // Pattern for numbered sitemap files (e.g., "sitemap-%d.xml")
 }
 
 // SetDefaultHost sets that arg from Sitemap.Finalize method
@@ -74,6 +81,21 @@ func (opts *Options) SetPretty(pretty bool) {
 // SetAdapter sets that arg from Sitemap.SetAdapter method
 func (opts *Options) SetAdapter(adp Adapter) {
 	opts.adp = adp
+}
+
+// SetConsolidateIndex sets whether to write all sitemaps to a single index file
+func (opts *Options) SetConsolidateIndex(consolidate bool) {
+	opts.consolidateIndex = consolidate
+}
+
+// SetIndexFilename sets the filename for the consolidated index file
+func (opts *Options) SetIndexFilename(filename string) {
+	opts.indexFilename = filename
+}
+
+// SetFilePattern sets the pattern for numbered sitemap files
+func (opts *Options) SetFilePattern(pattern string) {
+	opts.filePattern = pattern
 }
 
 // SitemapsHost sets that arg from Sitemap.SitemapsHost method

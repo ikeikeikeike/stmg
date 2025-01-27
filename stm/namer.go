@@ -71,3 +71,29 @@ func (n *Namer) Previous() *Namer {
 	}
 	return n
 }
+
+// IsIndex returns true if this is an index sitemap
+func (n *Namer) IsIndex() bool {
+	// 通过文件名判断是否是索引文件
+	return n.opts.base == "sitemap_index"
+}
+
+// IsMultiple returns true if this sitemap has multiple files
+func (n *Namer) IsMultiple() bool {
+	return n.count > 0
+}
+
+// Counter returns the current counter value
+func (n *Namer) Counter() int {
+	return n.count
+}
+
+// Ext returns the file extension
+func (n *Namer) Ext() string {
+	// 去掉开头的点号
+	ext := n.opts.extension
+	if len(ext) > 0 && ext[0] == '.' {
+		ext = ext[1:]
+	}
+	return ext
+}
